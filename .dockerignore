@@ -1,0 +1,12 @@
+__pycache__
+*.gguf
+llms
+assets
+data
+experiments
+src/chroma
+src/output
+src/temp
+chroma
+output
+temp

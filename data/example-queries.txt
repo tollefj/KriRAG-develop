@@ -1,0 +1,4 @@
+persons with residence and connections to the address (the crime scene) as owner, tenant, visitor, etc.
+how did the victim die (what is the cause of death?)
+details about the murder weapon (what is the murder weapon?)
+the victim's involvement in conflict or argument prior to death
