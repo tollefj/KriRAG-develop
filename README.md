@@ -1,11 +1,16 @@
-# setup
+# KriRAG
 
-## docker containers
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14450178.svg)](https://doi.org/10.5281/zenodo.14450178)
+
+Code for the paper:
+_Enhancing Criminal Investigation Analysis with Summarization and Memory-based Retrieval-Augmented Generation: A Comprehensive Evaluation of Real Case Data_
+
+## Installation
+
+### docker containers
 
 First, download the docker images (served as .tar files) through Zenodo.
-Links:
-
-
+Link: <https://doi.org/10.5281/zenodo.14450178>
 
 The script below sets up two containers: the API and UI service.
 
