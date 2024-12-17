@@ -2,6 +2,11 @@
 
 ## docker containers
 
+First, download the docker images (served as .tar files) through Zenodo.
+Links:
+
+
+
 The script below sets up two containers: the API and UI service.
 
 ```bash

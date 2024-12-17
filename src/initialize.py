@@ -34,21 +34,17 @@ def load_txt_from_folder(folder_path: str, lang: str = LANG) -> pd.DataFrame:
             if file.endswith(".txt"):
                 with open(os.path.join(root, file), "r", encoding="utf-8") as f:
                     _doc = f.readlines()
-                    parsed_data.extend(parse_document(_doc, lang))
+                    filename_no_ext = os.path.splitext(file)[0]
+                    parsed_data.extend(parse_document(_doc, lang, document_name=filename_no_ext))
 
     return pd.DataFrame(parsed_data)
-
-
-def load_single_document(docs: List[str], lang: str = LANG) -> pd.DataFrame:
-    parsed_data = parse_document(docs, lang)
-    df = pd.DataFrame(parsed_data)
-    return df
 
 
 def parse_document(
     docs: List[str],
     lang: str = LANG,
     strip_newlines: bool = True,
+    document_name: str = "",
 ) -> List[str]:
     if strip_newlines:
         print(f"Stripping newlines from {len(docs)} documents.")
@@ -69,7 +65,7 @@ def parse_document(
         _d_id = paragraph_sent_map[s_id]
         parsed_data.append(
             {
-                "id": f"DOC_{_d_id + 1}",  # for LLM referencing
+                "id": document_name,
                 "page_id": _d_id,
                 "sent_id": s_id,
                 "text": sent,
@@ -80,14 +76,17 @@ def parse_document(
 
 
 @st.cache_data
-def load_and_cache_documents(uploaded_file):
+def load_and_cache_documents(uploaded_file, lang: str):
+    print(f"Loading: {uploaded_file.name} with language: {lang}")
     ext = uploaded_file.name.split(".")[-1] if uploaded_file else None
+    filename = uploaded_file.name.split(".")[0] if uploaded_file else None
     df = pd.DataFrame()
     if ext == "txt":
         uploaded_file = uploaded_file.read().decode("utf-8")
-        uploaded_file = uploaded_file.split("\n")
         print(f"Loaded single document with {len(uploaded_file)} paragraphs.")
-        df = load_single_document(uploaded_file)
+
+        df = pd.DataFrame(parse_document(uploaded_file, lang=lang, document_name=filename))
+
     elif ext == "zip":
         with zipfile.ZipFile(uploaded_file, "r") as z:
             # remove the temp folder if it exists
@@ -101,11 +100,13 @@ def load_and_cache_documents(uploaded_file):
 
     print(f"Loaded {len(df)} documents.")
     # columns: id/page_id/sent_id/text
+    num_docs = df["id"].nunique()
     num_pages = df["page_id"].nunique()
     num_sents = df.shape[0]
-    st.info(f"Found {num_pages} documents and {num_sents} sentences")
+    st.info(f"Found {num_docs} documents, {num_pages} paragraphs, and {num_sents} sentences")
     return {
         "data": df.to_dict(orient="records"),
+        "num_docs": num_docs,
         "num_pages": num_pages,
         "num_sents": num_sents,
     }
@@ -128,6 +129,7 @@ def populate_collection(
         meta_text = "Adding metadata..."
         meta_bar = st.progress(0, text=meta_text)
         for percent_complete, row in enumerate(data):
+            print(f"Adding metadata for document: {row['id']}")
             document_meta.append(
                 {
                     "document": row["id"],

@@ -8,6 +8,7 @@ llms
 llama.cpp/
 src/models/EMBEDDING_MODEL
 src/sbert
+src/temp
 # .gitignore
 
 # Byte-compiled / optimized / DLL files

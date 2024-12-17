@@ -75,14 +75,7 @@ def run_rag(
         QUERY_MEMORY: List[str] = []
 
         with jsonlines.open(output_path, "w") as writer:
-            progress_text = f"Processing {len(documents)} documents..."
-            progress_bar = st.progress(0, text=progress_text)
-
             for i, matched_doc in enumerate(documents):
-                current_percentage = (i + 1) / len(documents)
-                progress_bar.progress(
-                    current_percentage, text=f"Document {i + 1}/{len(documents)}"
-                )
                 matching_full_docs = collection.get(
                     where={"document": {"$in": [matched_doc]}},
                 )

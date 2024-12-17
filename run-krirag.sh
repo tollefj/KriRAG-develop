@@ -1,18 +1,43 @@
 #!/bin/bash
+if [ -f .env ]; then
+    export $(grep -v '^#' .env | xargs)
+else
+    echo "Error: .env file not found. Please create it with the required variables."
+    exit 1
+fi
+
 if [ ! -d ~/LLM_STORE ] || [ -z "$(ls -A ~/LLM_STORE/*.gguf 2>/dev/null)" ]; then
     echo "Error: ~/LLM_STORE does not exist or contains no .gguf LLM files."
-    echo "Download and place a .gguf in ~/LLM_STORE and pass it as the first argument, or update the default model in the run script."
-    exit 1
 else
     echo "Found .gguf files in ~/LLM_STORE:"
     ls -1 ~/LLM_STORE/*.gguf
 fi
 
-MODEL_NAME=${1:-"gemma-2-2b-it-Q6_K.gguf"}  # gemma is default. first user arg is the model name otherwise.
+MODEL_NAME=${1:-"gemma-2-27b-it-Q5_K_M.gguf"}  # gemma is default. first user arg is the model name otherwise.
 
 if [ ! -f ~/LLM_STORE/$MODEL_NAME ]; then
     echo "Error: $MODEL_NAME not found in ~/LLM_STORE."
-    exit 1
+    echo "Make sure you download a .gguf model file and place it in ~/LLM_STORE."
+    default_model_url="https://huggingface.co/bartowski/gemma-2-27b-it-GGUF/resolve/main/gemma-2-27b-it-Q5_K_M.gguf"
+
+    read -p "Would you like to download the default model (gemma-2-27b-it-Q5_K_M.gguf, approx. 20GB)? [y/n] " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        mkdir -p ~/LLM_STORE
+        echo "Downloading default model to ~/LLM_STORE..."
+        wget --content-disposition "$default_model_url" -O ~/LLM_STORE/gemma-2-27b-it-Q5_K_M.gguf
+        
+        # Check if download succeeded
+        if [ $? -eq 0 ] && [ -f ~/LLM_STORE/gemma-2-27b-it-Q5_K_M.gguf ]; then
+            echo "Download completed successfully."
+        else
+            echo "Error: Failed to download the model. Please check your internet connection or try again."
+            exit 1
+        fi
+    else
+        echo "Exiting..."
+        exit 1
+    fi
 fi
 
 if ! docker image inspect krirag-api >/dev/null 2>&1 || ! docker image inspect krirag-ui >/dev/null 2>&1; then

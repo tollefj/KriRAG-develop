@@ -1,5 +1,11 @@
 #!/bin/bash
-# docker load -i docker/krirag-ui.tar
+
+if ! docker images | grep -q "krirag-ui"; then
+  docker load -i ui.tar
+else
+  echo "Image krirag-ui is already loaded."
+fi
+
 CONTAINER_NAME="krirag-ui"
 
 if ! docker network ls | grep -q krirag-net; then
